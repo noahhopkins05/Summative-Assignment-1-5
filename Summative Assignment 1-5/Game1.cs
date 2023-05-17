@@ -8,11 +8,12 @@ namespace Summative_Assignment_1_5
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        Texture2D buttonPressed, buttonUnpressed, animationBackground, endingBackground;
+        Texture2D buttonPressed, buttonUnpressed, animationBackground, endingBackground, carTexture;
         int buttonPushed = 0;
         MouseState mouseState;
-        Rectangle buttonCoords;
+        Rectangle backgroundCoords, carCoords;
         float startTime;
+        Vector2 carSpeed;
         enum Screen
         {
             Intro,
@@ -34,7 +35,10 @@ namespace Summative_Assignment_1_5
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
 
-            buttonCoords = new Rectangle(0,0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            backgroundCoords = new Rectangle(0,0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            carCoords = new Rectangle(0, 525, 150, 75);
+
+            carSpeed = new Vector2(1,1);
 
             base.Initialize();
         }
@@ -44,7 +48,8 @@ namespace Summative_Assignment_1_5
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             buttonUnpressed = Content.Load<Texture2D>("buttonunpressed");
             buttonPressed = Content.Load<Texture2D>("buttonPressed");
-
+            endingBackground = Content.Load<Texture2D>("endingBackground");
+            carTexture = Content.Load<Texture2D>("car");
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,7 +60,7 @@ namespace Summative_Assignment_1_5
                 Exit();
 
             if (mouseState.LeftButton == ButtonState.Pressed)
-                if (buttonCoords.Contains(mouseState.X, mouseState.Y))
+                if (backgroundCoords.Contains(mouseState.X, mouseState.Y))
                 {
                     buttonPushed = 1;
                 }
@@ -63,8 +68,14 @@ namespace Summative_Assignment_1_5
             {
                 startTime = (float)gameTime.TotalGameTime.TotalSeconds;
             }
-                   
-                    
+            if (screen == Screen.Animation)
+            {
+                carCoords.X += (int)carSpeed.X;
+                if (carCoords.X >= _graphics.PreferredBackBufferWidth / 2)
+                {
+                    carCoords.X += (int)carSpeed.X * 2;
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -76,16 +87,16 @@ namespace Summative_Assignment_1_5
             _spriteBatch.Begin();
             if (screen == Screen.Intro)
             {
-                _spriteBatch.Draw(buttonUnpressed,buttonCoords, Color.White);
+                _spriteBatch.Draw(buttonUnpressed,backgroundCoords, Color.White);
                 if (buttonPushed == 1)
                 {
-                    _spriteBatch.Draw(buttonPressed,buttonCoords, Color.White);
+                    _spriteBatch.Draw(buttonPressed,backgroundCoords, Color.White);
                     if (startTime > 1)
                     {
-                        _spriteBatch.Draw(buttonUnpressed, buttonCoords, Color.White);
+                        _spriteBatch.Draw(buttonUnpressed, backgroundCoords, Color.White);
                         if (mouseState.LeftButton == ButtonState.Pressed)
-                            if (buttonCoords.Contains(mouseState.X, mouseState.Y))
-                                _spriteBatch.Draw(buttonPressed, buttonCoords, Color.White);
+                            if (backgroundCoords.Contains(mouseState.X, mouseState.Y))
+                                _spriteBatch.Draw(buttonPressed, backgroundCoords, Color.White);
                     }
                     if (startTime >= 4)
                         screen = Screen.Animation;        
@@ -93,11 +104,11 @@ namespace Summative_Assignment_1_5
             }
             else if (screen == Screen.Animation)
             {
-
+                _spriteBatch.Draw(carTexture, carCoords, Color.White);
             }
             else if (screen == Screen.Outro)
             {
-
+                _spriteBatch.Draw(endingBackground, backgroundCoords, Color.White);
             }
 
             _spriteBatch.End();
