@@ -9,6 +9,10 @@ namespace Summative_Assignment_1_5
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         Texture2D buttonPressed, buttonUnpressed, animationBackground, endingBackground;
+        int buttonPushed = 0;
+        MouseState mouseState;
+        Rectangle buttonCoords;
+        float startTime;
         enum Screen
         {
             Intro,
@@ -29,6 +33,9 @@ namespace Summative_Assignment_1_5
             _graphics.PreferredBackBufferWidth = 1000;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
+
+            buttonCoords = new Rectangle(0,0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+
             base.Initialize();
         }
 
@@ -42,21 +49,47 @@ namespace Summative_Assignment_1_5
 
         protected override void Update(GameTime gameTime)
         {
+            mouseState = Mouse.GetState();
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (mouseState.LeftButton == ButtonState.Pressed)
+                if (buttonCoords.Contains(mouseState.X, mouseState.Y))
+                {
+                    buttonPushed = 1;
+                }
+            if (buttonPushed == 1)
+            {
+                startTime = (float)gameTime.TotalGameTime.TotalSeconds;
+            }
+                   
+                    
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             _spriteBatch.Begin();
             if (screen == Screen.Intro)
             {
-                _spriteBatch.Draw(buttonUnpressed, new Rectangle(0,0, _graphics.PreferredBackBufferWidth,_graphics.PreferredBackBufferHeight), Color.White);
+                _spriteBatch.Draw(buttonUnpressed,buttonCoords, Color.White);
+                if (buttonPushed == 1)
+                {
+                    _spriteBatch.Draw(buttonPressed,buttonCoords, Color.White);
+                    if (startTime > 1)
+                    {
+                        _spriteBatch.Draw(buttonUnpressed, buttonCoords, Color.White);
+                        if (mouseState.LeftButton == ButtonState.Pressed)
+                            if (buttonCoords.Contains(mouseState.X, mouseState.Y))
+                                _spriteBatch.Draw(buttonPressed, buttonCoords, Color.White);
+                    }
+                    if (startTime >= 4)
+                        screen = Screen.Animation;        
+                }
             }
             else if (screen == Screen.Animation)
             {
