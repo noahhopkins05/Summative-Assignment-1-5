@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Threading.Tasks.Dataflow;
 
 namespace Summative_Assignment_1_5
 {
@@ -8,10 +9,10 @@ namespace Summative_Assignment_1_5
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        Texture2D buttonPressed, buttonUnpressed, animationBackground, endingBackground, carTexture;
+        Texture2D buttonPressed, buttonUnpressed, animationBackground, endingBackground, carTexture, nitroTexture, roadTexture;
         int buttonPushed = 0;
         MouseState mouseState;
-        Rectangle backgroundCoords, carCoords;
+        Rectangle backgroundCoords, carCoords, nitroCoords;
         float startTime;
         Vector2 carSpeed;
         enum Screen
@@ -36,9 +37,10 @@ namespace Summative_Assignment_1_5
             _graphics.ApplyChanges();
 
             backgroundCoords = new Rectangle(0,0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-            carCoords = new Rectangle(0, 525, 150, 75);
+            carCoords = new Rectangle(0, _graphics.PreferredBackBufferHeight - 150, 150, 75);
+            nitroCoords = new Rectangle(400, _graphics.PreferredBackBufferHeight - 150, 100, 100);
 
-            carSpeed = new Vector2(1,1);
+            carSpeed = new Vector2(1, 1);
 
             base.Initialize();
         }
@@ -50,6 +52,8 @@ namespace Summative_Assignment_1_5
             buttonPressed = Content.Load<Texture2D>("buttonPressed");
             endingBackground = Content.Load<Texture2D>("endingBackground");
             carTexture = Content.Load<Texture2D>("car");
+            nitroTexture = Content.Load<Texture2D>("nitro flipped");
+            roadTexture = Content.Load<Texture2D>("road");
         }
 
         protected override void Update(GameTime gameTime)
@@ -70,10 +74,15 @@ namespace Summative_Assignment_1_5
             }
             if (screen == Screen.Animation)
             {
+                if (carCoords.X > _graphics.PreferredBackBufferWidth + 10)
+                {
+                    screen = Screen.Outro;
+                }
                 carCoords.X += (int)carSpeed.X;
                 if (carCoords.X >= _graphics.PreferredBackBufferWidth / 2)
                 {
                     carCoords.X += (int)carSpeed.X * 2;
+                    nitroCoords.X += (int)carSpeed.X * 3;
                 }
             }
 
@@ -104,7 +113,12 @@ namespace Summative_Assignment_1_5
             }
             else if (screen == Screen.Animation)
             {
+                _spriteBatch.Draw(roadTexture, backgroundCoords, Color.White);
                 _spriteBatch.Draw(carTexture, carCoords, Color.White);
+                if (carCoords.X > _graphics.PreferredBackBufferWidth / 2)
+                {
+                    _spriteBatch.Draw(nitroTexture, nitroCoords, Color.White);
+                }
             }
             else if (screen == Screen.Outro)
             {
